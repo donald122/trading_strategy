@@ -66,9 +66,11 @@ if __name__ == "__main__":
 
     #roc_strategy = ROC(price_factor_df, 3000, 0.014, target='Target', long_short='long', condition='lower')
     #roc_strategy.plot_graph()
-    test = running_single_strategy('ROC', price_factor_df, 'long', 'lower')
-    test.get_best().result_df.to_csv("roc_test_logic.csv")
-    test.plot_heat_map()
+    for i in threshold_params:
+        test = running_single_strategy(i, price_factor_df, 'long', 'lower')
+        test.get_best().result_df.to_csv(i + "_test_logic.csv")
+        print(type(test.get_best()).__name__ + ": " + str(test.get_best().window_size) + " " + str(test.get_best().threshold))
+    #test.plot_heat_map()
     print('done')
     #print(result.calmar)
     #print(result.sharpe)

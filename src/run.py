@@ -70,13 +70,16 @@ for filename in price_factor_dict:
 
 overall_result = pd.DataFrame()
 
-def running_single_strategy(strategy, price_factor_df, long_short, condition):
+def running_single_strategy(strategy, metric, price_factor_df, long_short, condition):
 
     test = Optimization(strategy, price_factor_df, window_size_list, threshold_params[strategy], target="Target", price='Price', long_short=long_short, condition=condition)
     test.run()
 
 
-    test_output = test.get_best()
+    test_output = {
+            'Metric': metric,
+            'Output': test.get_best()
+            }
     return test_output
 
 
@@ -84,11 +87,12 @@ if __name__ == "__main__":
 
     results_list = []
 
-    for run in running_list:
-        filename = run['Metric']
-        optimization_run = running_single_strategy(run['Strategy'], price_factor_dict[filename], run['Strategy Type'], run['Condition'])
+    parallel_results =  Parallel(n_jobs=-1)(delayed(running_single_strategy)(run['Strategy'], run['Metric'], price_factor_dict[run['Metric']], run['Strategy Type'], run['Condition'])for run in running_list)
 
-        results_list.append(run | optimization_run.dump_data())
+    for result in parallel_results:
+        ouput = result['Output']
+
+        results_list.append({ "Metric": result['Metric'] } | ouput.dump_data())
 
 
     results_list_df = pd.DataFrame(results_list)
