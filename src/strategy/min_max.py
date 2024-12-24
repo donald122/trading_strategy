@@ -18,8 +18,8 @@ class MinMax(Strategy):
 
 
     def _min_max_strategy(self, df, window_size, threshold, target, long_short, condition):
-        df['rolling_min'] = df[target].rolling(window=window_size).min()
-        df['rolling_max'] = df[target].rolling(window=window_size).max()
+        df['rolling_min'] = df[target].rolling(window=int(window_size)).min()
+        df['rolling_max'] = df[target].rolling(window=int(window_size)).max()
 
         df['Rolling_MinMax_Scaled'] = (df[target] - df['rolling_min']) / (df['rolling_max'] - df['rolling_min'])
 

@@ -18,9 +18,9 @@ class Robust(Strategy):
 
 
     def _robust_strategy(self, df, window_size, threshold, target, long_short, condition):
-        df['rolling_median'] = df[target].rolling(window=window_size).median()
-        df['rolling_q75'] = df[target].rolling(window=window_size).quantile(0.75)
-        df['rolling_q25'] = df[target].rolling(window=window_size).quantile(0.25)
+        df['rolling_median'] = df[target].rolling(window=int(window_size)).median()
+        df['rolling_q75'] = df[target].rolling(window=int(window_size)).quantile(0.75)
+        df['rolling_q25'] = df[target].rolling(window=int(window_size)).quantile(0.25)
 
         df['Robust_Scaled'] = (df[target] - df['rolling_median']) / (df['rolling_q75'] - df['rolling_q25'])
 

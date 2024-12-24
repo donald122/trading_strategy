@@ -50,20 +50,17 @@ class Optimization():
         return train_result_data, test_result_data
 
     def run(self):
-        results = []
+        #results = []
         train_results_data = []
         test_results_data = []
-        results = Parallel(n_jobs=-1, backend='loky')(delayed(self._run_strategy)(window_size, threshold) for window_size in self.window_size_list for threshold in self.threshold_list)
+        #results = Parallel(n_jobs=-1, backend='threading')(delayed(self._run_strategy)(window_size, threshold) for window_size in self.window_size_list for threshold in self.threshold_list)
 
 
-        #for window_size in self.window_size_list:
-        #    for threshold in self.threshold_list:
-        #        result = self._run_strategy(window_size, threshold)
-        #        results.append(result)
-
-        for train_result, test_result in results:
-            train_results_data.append(train_result)
-            test_results_data.append(test_result)
+        for window_size in self.window_size_list:
+            for threshold in self.threshold_list:
+                train_result, test_result = self._run_strategy(window_size, threshold)
+                train_results_data.append(train_result)
+                test_results_data.append(test_result)
 
         self.train_results_data_df = pd.DataFrame(train_results_data)
         self.train_results_data_df = self.train_results_data_df.sort_values(by='Sharpe', ascending=False)

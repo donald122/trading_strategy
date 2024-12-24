@@ -18,8 +18,8 @@ class Percentile(Strategy):
 
 
     def _percentile_strategy(self, df, window_size, threshold, target, long_short, condition):
-        #df['Rolling_Percentile'] = df[target].rolling(window_size).apply(lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False)
-        df['Rolling_Percentile'] = df[target].rolling(window_size).rank(pct=True)
+        #df['Rolling_Percentile'] = df[target].rolling(int(window_size)).apply(lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False)
+        df['Rolling_Percentile'] = df[target].rolling(int(window_size)).rank(pct=True)
 
         self._add_position(df, "Rolling_Percentile", "bounded", threshold, long_short, condition)
 

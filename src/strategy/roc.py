@@ -18,7 +18,7 @@ class ROC(Strategy):
 
 
     def _roc_strategy(self, df, window_size, threshold, target, long_short, condition):
-        df['ROC'] = (df[target] - df[target].shift(window_size))/df[target].shift(window_size)
+        df['ROC'] = (df[target] - df[target].shift(int(window_size)))/df[target].shift(int(window_size))
         self._add_position(df, "ROC", "diff", threshold, long_short, condition)
 
         return df

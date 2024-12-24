@@ -134,12 +134,12 @@ def running_single_strategy(strategy, metric, price_factor_df, long_short, condi
     train_df, test_df = split_data(price_factor_df)
     window_size_list = np.linspace(2, int(len(price_factor_df) * WINDOW_SIZE_PERRCENT),
                                    NUM_WINDOW_SIZES, dtype=int)
-    #try:
-    strategy_object = Optimization(metric, strategy_classes[strategy], train_df, test_df, window_size_list, threshold_params[strategy], target="Target", price='Price', long_short=long_short, condition=condition)
-    strategy_object.run()
-    strategy_object.save_optimization_result("./results/" + metric + "/")
-    #except:
-    #    print("Fail to run optimization: " + metric)
+    try:
+        strategy_object = Optimization(metric, strategy_classes[strategy], train_df, test_df, window_size_list, threshold_params[strategy], target="Target", price='Price', long_short=long_short, condition=condition)
+        strategy_object.run()
+        strategy_object.save_optimization_result("./results/" + metric + "/")
+    except:
+        print("Fail to run optimization: " + metric)
 
 
 if __name__ == "__main__":
