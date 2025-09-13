@@ -10,12 +10,6 @@ class ZScore(Strategy):
     def __init__(self, metric, source_df, window_size, threshold, target='Price', price='Price', long_short="long", condition="higher"):
         super().__init__(metric, source_df, window_size, threshold, target=target, price=price, long_short=long_short, condition=condition)
         self.result_df = self._z_score_strategy(source_df.copy(), window_size, threshold, target, long_short, condition)
-        self.annual_return = Strategy.annual_return(self.result_df)
-        self.mdds = Strategy.return_mdds(self.result_df['Cumulative_Profit'])
-        self.mdd = self.mdds[self.mdds.last_valid_index()]
-        self.calmar = self.annual_return/abs(self.mdd)
-        self.sharpe = Strategy.get_sharpe(self.result_df)
-
 
     def _z_score_strategy(self, df, window_size, threshold, target, long_short, condition):
         df['Moving_Average'] = Strategy.return_moving_average(df, target, window_size)

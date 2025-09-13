@@ -21,11 +21,6 @@ class Divergence(Strategy):
                          condition=condition)
         self.result_df = self._divergence_strategy(source_df.copy(), window_size, threshold, target, price, long_short,
                                                    condition)
-        self.annual_return = Strategy.annual_return(self.result_df)
-        self.mdds = Strategy.return_mdds(self.result_df['Cumulative_Profit'])
-        self.mdd = self.mdds[self.mdds.last_valid_index()]
-        self.calmar = self.annual_return / abs(self.mdd)
-        self.sharpe = Strategy.get_sharpe(self.result_df)
 
     def _divergence_strategy(self, df, window_size, threshold, target, price, long_short, condition):
         logger.debug(f"Executing divergence strategy")

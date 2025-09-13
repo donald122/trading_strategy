@@ -1,13 +1,14 @@
 import numpy as np
 #import pandas as pd
-import modin.pandas as pd
+import pandas as pd
 import matplotlib.pyplot as plt
 
 class Strategy:
 
-    bps = 10
+    bps = 5
 
     def __init__(self, metric, source_df, window_size, threshold, target='Price', price='Price', long_short="long", condition="higher"):
+        self.result_df = pd.DataFrame()
         self.metric = metric
         self.commission = 0.0001 * Strategy.bps
         self.source_df = source_df
@@ -27,7 +28,7 @@ class Strategy:
         self.correlation = 0
 
     @staticmethod
-    def annual_return(df, profit='Profit'):
+    def get_annual_return(df, profit='Profit'):
         multiplier = Strategy.return_timeframe_multiplier(df)
         return df[profit].mean() * multiplier
 
@@ -57,7 +58,7 @@ class Strategy:
 
     @staticmethod
     def return_timeframe_multiplier(df):
-        diff = df['Date'].diff()
+        diff = df.index.to_series().diff()
         most_common_interval = diff.mode()[0]
         multiplier = 0
         if most_common_interval >= pd.Timedelta(days=1):
@@ -66,8 +67,6 @@ class Strategy:
             multiplier = 365 * 24
         elif most_common_interval >= pd.Timedelta(minutes=10):
             multiplier = 365 * 24 * 6
-        elif most_common_interval >= pd.Timedelta(minutes=2.5):
-            multiplier = 365 * 24 * 24
         elif most_common_interval >= pd.Timedelta(minutes=1):
             multiplier = 365 * 24 * 60
         elif most_common_interval >= pd.Timedelta(seconds=1):
@@ -126,11 +125,19 @@ class Strategy:
                             df['Position'] = ((df[signal].astype(float) < threshold).astype(int)) + \
                                             ((df[signal].astype(float) > (1 - threshold)).astype(int) * -1)
 
+        self.add_profit(df)
 
+    def add_profit(self, df):
 
         df['Profit'] = df['Position'].shift(1) * df['Changes'] - abs(df['Position'].diff()).fillna(0) * self.commission
+        #df['Profit'] = df['Position'].shift(1) * df['Changes']
         df['Cumulative_Profit'] = df['Profit'].cumsum()
         self.correlation = self._get_correlation(df)
+        self.annual_return = self.get_annual_return(df)
+        mdds = self.return_mdds(df['Cumulative_Profit'])
+        self.mdd = mdds[mdds.last_valid_index()]
+        self.calmar = self.annual_return/abs(self.mdd)
+        self.sharpe = self.get_sharpe(df)
 
     def _get_correlation(self, df):
         correlation = 0

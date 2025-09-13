@@ -33,8 +33,8 @@ pd.set_option('mode.string_storage', 'pyarrow')
 BPS = 5 # commission
 GLASSNODE_API_KEY = os.getenv('GLASSNODE_API_KEY')
 ASSET = 'BTC'
-INTERVAL = '10m'
-WINDOW_SIZE_PERRCENT = 0.10
+INTERVAL = '1h'
+WINDOW_SIZE_PERRCENT = 0.01
 NUM_WINDOW_SIZES = 40
 TRAIN_RATIO = 0.7
 
@@ -81,20 +81,20 @@ for filename in os.listdir(directory):
         #factor_df = factor_df.convert_dtypes(dtype_backend='pyarrow')  # might increase performance
         factor_df.columns = ['Date', 'Target']
         factor_df["Date"] = pd.to_datetime(factor_df["Date"])
-        factor_df['Target'] = factor_df['Target'].shift(5) # shift data to avoid bias
+        factor_df['Target'] = factor_df['Target'].shift(5) # shift data to avoid bias (24H: Shift = 1; 1h: Shift = 2; 10m: Shift = 5)
         price_factor_df = pd.merge(btc_price_df, factor_df, how='inner', on='Date')
 
         price_factor_dict[filename] = price_factor_df
 
 threshold_params = {
-        'ZScore': np.round(np.linspace(-4, 4, 20), 3),
-        'MovingAverage': np.round(np.linspace(-3, 3, 20), 3),
+        'ZScore': np.round(np.linspace(-5, 5, 20), 3),
+        'MovingAverage': np.round(np.linspace(-4, 4, 20), 3),
         'RSI': np.round(np.linspace(0.2, 0.8, 20), 3),
-        'ROC': np.round(np.linspace(-0.1, 0.1, 20), 3),
+        'ROC': np.round(np.linspace(-1, 1, 20), 3),
         'MinMax': np.round(np.linspace(0.1, 0.9, 20), 3),
-        'Robust': np.round(np.linspace(-3, 3, 20), 3),
+        'Robust': np.round(np.linspace(-4, 4, 20), 3),
         'Percentile': np.round(np.linspace(0.1, 0.9, 20), 3),
-        'Divergence': np.round(np.linspace(-3, 3, 20), 3)
+        'Divergence': np.round(np.linspace(-4, 4, 20), 3)
     }
 strategy_classes = {
         'ZScore': ZScore,
@@ -145,7 +145,7 @@ def running_single_strategy(strategy, metric, price_factor_df, long_short, condi
 if __name__ == "__main__":
 
     with tqdm_joblib(tqdm(leave=False, desc="Processing", total=len(running_list))) as progress_bar:
-        parallel_results =  Parallel(n_jobs=-1, backend='loky')(delayed(running_single_strategy)(run['Strategy'], run['Metric'], price_factor_dict[run['Metric']], run['Strategy Type'], run['Condition'])for run in running_list)
+        parallel_results =  Parallel(n_jobs=7, backend='loky')(delayed(running_single_strategy)(run['Strategy'], run['Metric'], price_factor_dict[run['Metric']], run['Strategy Type'], run['Condition'])for run in running_list)
 
     #for run in tqdm(running_list, desc="Processing Tasks"):
     #    running_single_strategy(run['Strategy'], run['Metric'], price_factor_dict[run['Metric']], run['Strategy Type'], run['Condition'])

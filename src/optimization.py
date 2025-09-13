@@ -139,12 +139,12 @@ class Optimization():
         fig, _ = self._create_optimization_result()
         train_best, test_best = self.get_best()
 
-        # do not save if position transition less than 100
+        # do not save if position transition less than a value
         train_best_transitions = (train_best.result_df['Position'] != train_best.result_df['Position'].shift()).sum() - 1
-        if train_best_transitions > 100:
+        if train_best_transitions > 10:
 
-            if train_best.sharpe > 1.5 or (self.long_short == 'short' and train_best.calmar > 0.5):
-                if train_best.correlation < 0.9:
+            if train_best.sharpe > 1.1 or (self.long_short == 'short' and train_best.calmar > 0.5):
+                if train_best.correlation < 1:
                     # Save graph
                     os.makedirs(directory, exist_ok=True)
                     result_strategy_name = f"{self.strategy_class.__name__}_{self.long_short}_{self.condition}"
